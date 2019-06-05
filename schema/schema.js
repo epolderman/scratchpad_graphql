@@ -9,7 +9,21 @@ const axios = require('axios');
 // graphql can serve as a proxy, talkt to serveral backend api's and not one monolithic data store, and ship
 // a response back our client. graphql can make it's own http requests back to other api's and formulate a response
 
+// high level
+// each edge in our graph can be a resolve function
+// schema / data => bunch of fucntions that return references to other objects in our graph
+
 const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema } = graphql;
+
+// instructs graphql on what the object looks like, types, & relation
+const CompanyType = new GraphQLObjectType({
+  name: 'Company',
+  fields: {
+    id: { type: GraphQLString },
+    name: { type: GraphQLString },
+    description: { type: GraphQLString }
+  }
+});
 
 // instructs graphql on what the object looks like, types, & relation
 const UserType = new GraphQLObjectType({
@@ -17,7 +31,15 @@ const UserType = new GraphQLObjectType({
   fields: {
     id: { type: GraphQLString },
     firstName: { type: GraphQLString },
-    age: { type: GraphQLInt }
+    age: { type: GraphQLInt },
+    company: {
+      type: CompanyType,
+      resolve(parentValue, args) {
+        return axios
+          .get(`http://localhost:3000/company/${parentValue.companyId}`)
+          .then(res => res.data);
+      }
+    }
   }
 });
 
@@ -35,6 +57,15 @@ const RootQuery = new GraphQLObjectType({
       resolve(parentValue, args) {
         return axios
           .get(`http://localhost:3000/users/${args.id}`)
+          .then(res => res.data);
+      }
+    },
+    company: {
+      type: CompanyType,
+      args: { id: { type: GraphQLString } },
+      resolve(parentValue, args) {
+        return axios
+          .get(`http://localhost:3000/company/${args.id}`)
           .then(res => res.data);
       }
     }
