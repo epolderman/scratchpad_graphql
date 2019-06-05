@@ -13,22 +13,36 @@ const axios = require('axios');
 // each edge in our graph can be a resolve function
 // schema / data => bunch of fucntions that return references to other objects in our graph
 
-const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema } = graphql;
+const {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLSchema,
+  GraphQLList
+} = graphql;
 
 // instructs graphql on what the object looks like, types, & relation
 const CompanyType = new GraphQLObjectType({
   name: 'Company',
-  fields: {
+  fields: () => ({
     id: { type: GraphQLString },
     name: { type: GraphQLString },
-    description: { type: GraphQLString }
-  }
+    description: { type: GraphQLString },
+    users: {
+      type: new GraphQLList(UserType),
+      resolve(parentValue, args) {
+        return axios
+          .get(`http://localhost:3000/company/${[parentValue.id]}/users`)
+          .then(res => res.data);
+      }
+    }
+  })
 });
 
 // instructs graphql on what the object looks like, types, & relation
 const UserType = new GraphQLObjectType({
   name: 'User',
-  fields: {
+  fields: () => ({
     id: { type: GraphQLString },
     firstName: { type: GraphQLString },
     age: { type: GraphQLInt },
@@ -40,7 +54,7 @@ const UserType = new GraphQLObjectType({
           .then(res => res.data);
       }
     }
-  }
+  })
 });
 
 // root query => allows us to jump into our graph of data => give us user with id 23
