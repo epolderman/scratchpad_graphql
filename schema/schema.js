@@ -1,18 +1,13 @@
 /* Req all knowledge what properties each object has and the relation to one another */
 
 const graphql = require('graphql');
-const _ = require('lodash');
+const axios = require('axios');
 
 // problem with restful routing => graphql can request only the types we need, firstName instead of
 // the entire object
 
 // graphql can serve as a proxy, talkt to serveral backend api's and not one monolithic data store, and ship
 // a response back our client. graphql can make it's own http requests back to other api's and formulate a response
-
-const USERS = [
-  { id: '23', firstName: 'Erik', age: 32 },
-  { id: '24', firstName: 'Bob', age: 22 }
-];
 
 const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema } = graphql;
 
@@ -38,7 +33,9 @@ const RootQuery = new GraphQLObjectType({
       type: UserType,
       args: { id: { type: GraphQLString } },
       resolve(parentValue, args) {
-        return _.find(USERS, u => u.id === args.id);
+        return axios
+          .get(`http://localhost:3000/users/${args.id}`)
+          .then(res => res.data);
       }
     }
   }
