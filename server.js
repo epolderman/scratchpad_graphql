@@ -1,4 +1,7 @@
 const express = require('express');
+const schema = require('./schema/schema');
+
+const PORT = 4000;
 
 // glue layer in express
 const expressGraphQL = require('express-graphql');
@@ -11,10 +14,11 @@ const app = express();
 app.use(
   '/graphql',
   expressGraphQL({
+    schema,
     graphiql: true
   })
 );
 
-app.listen(4000, () => {
-  console.log('Listening...');
+app.listen(PORT, () => {
+  console.log('Listening...', PORT);
 });

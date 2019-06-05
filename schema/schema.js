@@ -1,13 +1,20 @@
 /* Req all knowledge what properties each object has and the relation to one another */
+
 const graphql = require('graphql');
 const _ = require('lodash');
+
+// problem with restful routing => graphql can request only the types we need, firstName instead of
+// the entire object
+
+// graphql can serve as a proxy, talkt to serveral backend api's and not one monolithic data store, and ship
+// a response back our client. graphql can make it's own http requests back to other api's and formulate a response
 
 const USERS = [
   { id: '23', firstName: 'Erik', age: 32 },
   { id: '24', firstName: 'Bob', age: 22 }
 ];
 
-const { GraphQLObjectType, GraphQLString, GraphQLInt } = graphql;
+const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema } = graphql;
 
 // instructs graphql on what the object looks like, types, & relation
 const UserType = new GraphQLObjectType({
@@ -29,10 +36,14 @@ const RootQuery = new GraphQLObjectType({
   fields: {
     user: {
       type: UserType,
-      arge: { id: { type: GraphQLString } },
+      args: { id: { type: GraphQLString } },
       resolve(parentValue, args) {
         return _.find(USERS, u => u.id === args.id);
       }
     }
   }
+});
+
+module.exports = new GraphQLSchema({
+  query: RootQuery
 });
