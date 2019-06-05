@@ -1,0 +1,1 @@
+### Scratchpad for learning GraphQL
