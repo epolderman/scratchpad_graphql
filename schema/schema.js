@@ -1,17 +1,10 @@
-/* Req all knowledge what properties each object has and the relation to one another */
+/* 
+  Communicates how all objects are related to one another
+  Req all knowledge what properties each object has and the relation to one another 
+*/
 
 const graphql = require('graphql');
 const axios = require('axios');
-
-// problem with restful routing => graphql can request only the types we need, firstName instead of
-// the entire object
-
-// graphql can serve as a proxy, talkt to serveral backend api's and not one monolithic data store, and ship
-// a response back our client. graphql can make it's own http requests back to other api's and formulate a response
-
-// high level
-// each edge in our graph can be a resolve function
-// schema / data => bunch of fucntions that return references to other objects in our graph
 
 const {
   GraphQLObjectType,
@@ -58,11 +51,13 @@ const UserType = new GraphQLObjectType({
   })
 });
 
-// root query => allows us to jump into our graph of data => give us user with id 23
-// entry point into our data
+/*  
+    root query => allows us to jump into our graph of data => give us user with id 23
+    entry point into our data graph.
+    resolve function is where we go into our database and find the actual data we are looking for
+    grab our data / parentValue => never is really used / args => args passed into query from our data store / db
+*/
 
-// resolve function is where we go into our database and find the actual data we are looking for
-// grab our data / parentValue => never is really used / args => args passed into query
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
@@ -142,3 +137,49 @@ module.exports = new GraphQLSchema({
   query: RootQuery,
   mutation: Mutation
 });
+
+// problem with restful routing => graphql can request only the types we need, firstName instead of
+// the entire object
+
+// graphql can serve as a proxy, talkt to serveral backend api's and not one monolithic data store, and ship
+// a response back our client. graphql can make it's own http requests back to other api's and formulate a response
+
+// high level
+// each edge in our graph can be a resolve function
+// schema / data => bunch of fucntions that return references to other objects in our graph
+
+/* 
+
+TypeScript example:
+
+const schema = gql`
+
+  extend type Query {
+    listPageTemplates: [PageTemplate!]!
+    getPageTemplate(
+      input: GetLogbookPageTemplateRequest!
+    ): GetLogbookPageTemplateResponse!
+  }
+
+  input DataShotConfigInput {
+    standardMealPeriodIds: StandardIdsInput!
+    standardRevenueCenterIds: StandardIdsInput!
+  }
+
+  type PageTemplate {
+    id: ID!
+    name: String!
+    dateCreated: String!
+  }
+
+  type LogbookWithoutPermissions {
+    id: ID!
+  }
+
+  type SectionTemplate {
+    id: ID!
+    name: String!
+    dateCreated: String!
+  }
+
+*/
